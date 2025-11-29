@@ -1,0 +1,20 @@
+# Fisiere mari / sensibile
+data/raw/
+data/processed/stack.nc
+data/processed/*.tif
+results/*.joblib
+results/shap_plots/
+figures/*.png
+
+# Chestii generate automat
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# VSCode / notebooks / OS
+.vscode/
+.DS_Store
+
+# Medii / config local
+.env
+*.log

@@ -1,0 +1,5 @@
+metric,value
+accuracy,0.965412004069176
+f1_macro,0.907526303841033
+n_test_samples,983
+features_source,/content/drive/MyDrive/AgriVulnAI/data/processed/features_ground_truth_with_extra.csv

@@ -18,3 +18,5 @@ __pycache__/
 # Medii / config local
 .env
 *.log
+# Big NetCDF stacks (don't push to GitHub)
+data/processed/stack-*.nc

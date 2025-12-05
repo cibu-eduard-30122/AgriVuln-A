@@ -8,7 +8,7 @@ AgriVulnAI – Kenya Vulnerability Dashboard (Plotly-only version)
 """
 
 from pathlib import Path
-from typing import Tuple, List, Dict
+from typing import List, Dict
 
 import numpy as np
 import pandas as pd
@@ -21,6 +21,7 @@ import streamlit as st
 # -----------------------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data" / "processed"
+BASE_RESULTS_DIR = BASE_DIR / "results"  # pentru SHAP plots
 
 CSV_V2 = DATA_DIR / "ground_truth_with_predictions_v2.csv"
 CSV_V1 = DATA_DIR / "ground_truth_with_predictions.csv"
@@ -202,7 +203,6 @@ def main() -> None:
     # --- filtru clustere v2 ---
     cluster_options = [0, 1, 2, 3]
     cluster_labels = [get_cluster_text(c) for c in cluster_options]
-    default_clusters = cluster_options  # toate selectate
     selected_labels = st.sidebar.multiselect(
         "Vulnerability cluster v2 (0=low, 3=very high)",
         options=cluster_labels,
@@ -368,15 +368,56 @@ Dashboard interactiv pentru a explora predicțiile de vulnerabilitate agricolă 
             st.markdown(summary["drivers"])
 
     # -----------------------------------------------------------------------------
-    # SHAP TAB (simplu – imagine dacă există)
+    # SHAP TAB – afișăm toate ploturile disponibile
     # -----------------------------------------------------------------------------
     with tab_shap:
         st.subheader("SHAP – feature importance")
-        shap_png = BASE_DIR / "results" / "shap_plots" / "shap_summary.png"
-        if shap_png.exists():
-            st.image(str(shap_png), caption="SHAP summary plot (model LightGBM)")
+
+        shap_dir = BASE_RESULTS_DIR / "shap_plots"
+
+        if not shap_dir.exists():
+            st.info(f"SHAP folder not found at: `{shap_dir}`")
         else:
-            st.info("SHAP summary image not found. Place it in `results/shap_plots/shap_summary.png`.")
+            # 1️⃣ Heatmap global (features × classes) – summary principal
+            heatmap_path = shap_dir / "shap_heatmap_features_x_classes.png"
+
+            if heatmap_path.exists():
+                st.markdown("### Global SHAP heatmap (features × classes)")
+                st.image(str(heatmap_path), width="stretch")
+            else:
+                st.warning(
+                    "SHAP heatmap `shap_heatmap_features_x_classes.png` not found in `results/shap_plots`."
+                )
+
+            st.markdown("---")
+
+            # 2️⃣ Bar charts – global importance per class
+            st.markdown("### Global feature importance per class (bar charts)")
+            bar_paths = sorted(shap_dir.glob("shap_bar_global_class_*.png"))
+
+            if bar_paths:
+                for p in bar_paths:
+                    st.image(str(p), caption=p.stem, width="stretch")
+            else:
+                st.info(
+                    "No SHAP global bar plots found (expected files like "
+                    "`shap_bar_global_class_0_class_0.png`)."
+                )
+
+            st.markdown("---")
+
+            # 3️⃣ Beeswarm plots – distribution per feature & class
+            st.markdown("### SHAP beeswarm plots per class")
+            beeswarm_paths = sorted(shap_dir.glob("shap_beeswarm_class_*.png"))
+
+            if beeswarm_paths:
+                for p in beeswarm_paths:
+                    st.image(str(p), caption=p.stem, width="stretch")
+            else:
+                st.info(
+                    "No SHAP beeswarm plots found (expected files like "
+                    "`shap_beeswarm_class_0_class_0.png`)."
+                )
 
     # -----------------------------------------------------------------------------
     # DATA TAB
